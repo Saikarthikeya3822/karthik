@@ -19,6 +19,8 @@ from imutils import paths
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from tensorflow.keras.optimizers.schedules import ExponentialDecay
+
 
 # initialize the initial learning rate, number of epochs to train for,
 # and batch size
@@ -26,7 +28,7 @@ INIT_LR = 1e-4
 EPOCHS = 20
 BS = 32
 
-DIRECTORY = r"C:\Mask Detection\CODE\Face-Mask-Detection-master\dataset"
+DIRECTORY = r"E:\proj\Face-Mask-Detection\dataset"
 CATEGORIES = ["with_mask", "without_mask"]
 
 # grab the list of images in our dataset directory, then initialize
@@ -92,10 +94,18 @@ for layer in baseModel.layers:
 	layer.trainable = False
 
 # compile our model
-print("[INFO] compiling model...")
-opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
-model.compile(loss="binary_crossentropy", optimizer=opt,
-	metrics=["accuracy"])
+#print("[INFO] compiling model...")
+#opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+#model.compile(loss="binary_crossentropy", optimizer=opt,metrics=["accuracy"])
+
+################################### my decay
+lr_schedule = ExponentialDecay(INIT_LR, decay_steps=10000, decay_rate=0.9, staircase=True)
+opt = Adam(learning_rate=lr_schedule)
+model.compile(loss="binary_crossentropy", optimizer=opt,metrics=["accuracy"])
+
+##################################
+
+# Create the optimizer with the learning rate schedule
 
 # train the head of the network
 print("[INFO] training head...")
@@ -134,4 +144,4 @@ plt.title("Training Loss and Accuracy")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
 plt.legend(loc="lower left")
-plt.savefig("plot.png")
+plt.savefig("myplot.png")
